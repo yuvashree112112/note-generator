@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta-name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Notes Generator</title>
+
     <link rel="stylesheet" href="style.css">
 
-    <!-- PDF.js Library -->
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
 
@@ -17,11 +21,13 @@
 
         <div class="upload-box">
             <input type="file" id="pdfUpload" accept="application/pdf">
-            <button onclick="extractPDF()">Extract Notes</button>
+            <button onclick="extractPDF()">Generate Notes</button>
         </div>
 
-        <h2>Generated Notes</h2>
-        <textarea id="output" readonly></textarea>
+        <h2>Generated Academic Notes</h2>
+
+        <!-- FULL PAGE NOTES OUTPUT -->
+        <div id="output" class="full-notes"></div>
 
         <button class="downloadBtn" onclick="downloadNotes()">Download Notes</button>
     </div>

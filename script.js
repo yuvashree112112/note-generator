@@ -1,8 +1,8 @@
-// Extract PDF text using PDF.js
+// MAIN FUNCTION → Extract PDF
 async function extractPDF() {
     const file = document.getElementById("pdfUpload").files[0];
     if (!file) {
-        alert("Please upload a PDF file first!");
+        alert("Please upload a PDF file!");
         return;
     }
 
@@ -17,19 +17,20 @@ async function extractPDF() {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
             const strings = content.items.map(item => item.str);
-            fullText += strings.join(" ") + "\n\n";
+            fullText += strings.join(" ") + "\n";
         }
 
-        let cleaned = cleanText(fullText);
-        let summary = generateSummary(cleaned);
+        const cleaned = cleanText(fullText);
+        const formattedNotes = formatAcademicNotes(cleaned);
 
-        document.getElementById("output").value = summary;
+        document.getElementById("output").innerHTML = formattedNotes;
     };
 
     reader.readAsArrayBuffer(file);
 }
 
-// Clean text (remove extra spaces, page numbers, etc.)
+
+// BASIC CLEANING
 function cleanText(text) {
     return text
         .replace(/\s+/g, " ")
@@ -37,40 +38,39 @@ function cleanText(text) {
         .trim();
 }
 
-// Basic summarizer
-function generateSummary(text) {
-    const sentences = text.split(". ");
-    const wordFreq = {};
 
-    text.split(" ").forEach(word => {
-        word = word.toLowerCase();
-        if (!wordFreq[word]) wordFreq[word] = 0;
-        wordFreq[word]++;
+// FORMAT TEXT INTO ACADEMIC NOTES
+function formatAcademicNotes(text) {
+    let lines = text.split(". ");
+    let notes = "";
+    let sectionCount = 1;
+
+    lines.forEach(line => {
+        line = line.trim();
+
+        // Detect headings (ALL CAPS or short titles)
+        if (line.length < 25 || /^[A-Z ]+$/.test(line)) {
+            notes += `\n${sectionCount}. <span class="section-title">${line}</span>\n`;
+            sectionCount++;
+        } 
+        else {
+            // bullet points
+            notes += `<span class="bullet-point">- ${line}.</span>\n`;
+        }
     });
 
-    const scored = sentences.map(sentence => {
-        let score = 0;
-        sentence.split(" ").forEach(word => {
-            score += wordFreq[word.toLowerCase()] || 0;
-        });
-        return { sentence, score };
-    });
-
-    const topSentences = scored
-        .sort((a, b) => b.score - a.score)
-        .slice(0, Math.ceil(sentences.length * 0.2))
-        .map(item => "• " + item.sentence.trim());
-
-    return topSentences.join("\n");
+    return notes;
 }
 
-// Download notes
-function downloadNotes() {
-    const text = document.getElementById("output").value;
-    const blob = new Blob([text], { type: "text/plain" });
-    const link = document.createElement("a");
 
-    link.href = URL.createObjectURL(blob);
-    link.download = "Notes.txt";
+// DOWNLOAD NOTES AS TEXT FILE
+function downloadNotes() {
+    const text = document.getElementById("output").innerText;
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Generated_Notes.txt";
     link.click();
 }
